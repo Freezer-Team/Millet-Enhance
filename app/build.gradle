@@ -5,6 +5,7 @@ plugins {
 android {
     namespace 'nep.timeline.millet_enhance'
     compileSdk 34
+
     defaultConfig {
         applicationId "nep.timeline.millet_enhance"
         minSdk 28

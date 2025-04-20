@@ -15,17 +15,20 @@ public class BroadcastIntentHook {
     public BroadcastIntentHook(ClassLoader classLoader) {
        try {
            Class<?> clazz = XposedHelpers.findClassIfExists("com.android.server.am.ActivityManagerService", classLoader);
+           if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+               Class<?> controller = XposedHelpers.findClassIfExists("com.android.server.am.BroadcastController", classLoader);
+               if (controller != null)
+                   clazz = controller;
+           }
 
            if (clazz == null) {
                XposedBridge.log(GlobalVars.TAG + " -> Failed to listen broadcast intent!");
                return;
            }
 
-           String methodName = (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ? "broadcastIntentLocked" : "broadcastIntentLockedTraced");
-
            Method targetMethod = null;
            for (Method method : clazz.getDeclaredMethods())
-               if (method.getName().equals(methodName) && (targetMethod == null || targetMethod.getParameterTypes().length < method.getParameterTypes().length))
+               if (method.getName().equals("broadcastIntentLocked") && (targetMethod == null || targetMethod.getParameterTypes().length < method.getParameterTypes().length))
                    targetMethod = method;
 
            ArrayList<Object> arrayList = new ArrayList<>(Arrays.asList(targetMethod.getParameterTypes()));

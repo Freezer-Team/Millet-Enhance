@@ -57,7 +57,10 @@ public class BroadcastIntentHook {
                        if (intent != null) {
                            String action = intent.getAction();
 
-                           if (action == null || !action.endsWith(".android.c2dm.intent.RECEIVE"))
+                           boolean isFCM = action.endsWith(".android.c2dm.intent.RECEIVE");
+                           boolean isUnified = "org.unifiedpush.android.connector.MESSAGE".equals(action)
+
+                           if (action == null || (!isFCM && !isUnified))
                                return;
 
                            String packageName = (intent.getComponent() == null ? intent.getPackage() : intent.getComponent().getPackageName());
@@ -67,7 +70,7 @@ public class BroadcastIntentHook {
 
                            int uid = ActivityManagerService.getUidFromPackage(packageName, userId);
                            if (uid != -1 && GreezeManagerService.isUidFrozen(uid))
-                               GreezeManagerService.thawUid(uid, 1000, "FCM");
+                               GreezeManagerService.thawUid(uid, 1000, isFCM ? "FCM" : "Unified");
                        }
                    } catch (Throwable throwable) {
                        XposedBridge.log(GlobalVars.TAG + " -> Throw exception:");

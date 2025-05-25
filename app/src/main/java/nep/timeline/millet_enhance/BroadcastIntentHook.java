@@ -58,7 +58,7 @@ public class BroadcastIntentHook {
                            String action = intent.getAction();
 
                            boolean isFCM = action.endsWith(".android.c2dm.intent.RECEIVE");
-                           boolean isUnified = "org.unifiedpush.android.connector.MESSAGE".equals(action)
+                           boolean isUnified = "org.unifiedpush.android.connector.MESSAGE".equals(action);
 
                            if (action == null || (!isFCM && !isUnified))
                                return;

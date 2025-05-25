@@ -10,7 +10,7 @@ android {
         applicationId "nep.timeline.millet_enhance"
         minSdk 28
         targetSdk 35
-        versionCode 2
+        versionCode 3
         versionName "Mystery"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

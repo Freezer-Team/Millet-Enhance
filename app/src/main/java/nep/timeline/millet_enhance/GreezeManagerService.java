@@ -5,6 +5,8 @@ import de.robv.android.xposed.XposedHelpers;
 public class GreezeManagerService {
     private static volatile Object instance;
 
+    public static boolean newThawUids = false;
+
     public static void setInstance(Object instance) {
         GreezeManagerService.instance = instance;
     }
@@ -19,6 +21,9 @@ public class GreezeManagerService {
     public static boolean thawUid(int targetUid, int callerUid, String reason) {
         if (instance == null)
             return false;
+
+        if (newThawUids)
+            return XposedHelpers.callMethod(instance, "thawUids", new int[]{targetUid}, callerUid, reason) != null;
 
         return (boolean) XposedHelpers.callMethod(instance, "thawUid", targetUid, callerUid, reason);
     }

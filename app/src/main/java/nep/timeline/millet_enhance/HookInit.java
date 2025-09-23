@@ -14,22 +14,18 @@ public class HookInit implements IXposedHookLoadPackage {
         if ("android".equals(packageParam.packageName)) {
             ClassLoader classLoader = packageParam.classLoader;
 
-            Class<?> greezeService = XposedHelpers.findClassIfExists("com.miui.server.greeze.GreezeManagerStub", classLoader);
-            if (greezeService != null) {
-                GreezeManagerService.newThawUids = true;
+            Class<?> greezeService = XposedHelpers.findClassIfExists("com.miui.server.greeze.GreezeManagerService", classLoader);
+            if (greezeService == null) {
+                XposedBridge.log(GlobalVars.TAG + " -> Your device is unsupported!");
+                return;
+            }
 
+            XposedBridge.log(GlobalVars.TAG + " -> Start hooking!");
+
+            try {
+                GreezeManagerService.setInstance(XposedHelpers.callStaticMethod(greezeService, "getInstance"));
                 XposedBridge.log(GlobalVars.TAG + " -> Use new API bindings!");
-
-                GreezeManagerService.setInstance(XposedHelpers.callStaticMethod(greezeService, "get"));
-            } else {
-                greezeService = XposedHelpers.findClassIfExists("com.miui.server.greeze.GreezeManagerService", classLoader);
-                if (greezeService == null) {
-                    XposedBridge.log(GlobalVars.TAG + " -> Your device is unsupported!");
-                    return;
-                }
-
-                XposedBridge.log(GlobalVars.TAG + " -> Start hooking!");
-
+            } catch (Exception e) {
                 XposedHelpers.findAndHookConstructor(greezeService, Context.class, new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) {

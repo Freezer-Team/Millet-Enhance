@@ -13,7 +13,6 @@ public class HookInit implements IXposedHookLoadPackage {
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam packageParam) {
         if ("android".equals(packageParam.packageName)) {
             ClassLoader classLoader = packageParam.classLoader;
-
             Class<?> greezeService = XposedHelpers.findClassIfExists("com.miui.server.greeze.GreezeManagerService", classLoader);
             if (greezeService == null) {
                 XposedBridge.log(GlobalVars.TAG + " -> Your device is unsupported!");
@@ -21,13 +20,22 @@ public class HookInit implements IXposedHookLoadPackage {
             }
 
             XposedBridge.log(GlobalVars.TAG + " -> Start hooking!");
-
-            XposedHelpers.findAndHookConstructor(greezeService, Context.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) {
-                    GreezeManagerService.setInstance(param.thisObject);
-                }
-            });
+            
+            try {
+                XposedHelpers.findAndHookMethod(greezeService, "init", Context.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) {
+                        GreezeManagerService.setInstance(param.thisObject);
+                    }
+                });
+            } catch (Throwable ignored) {
+                XposedHelpers.findAndHookConstructor(greezeService, Context.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) {
+                        GreezeManagerService.setInstance(param.thisObject);
+                    }
+                });
+            }
 
             XposedHelpers.findAndHookMethod(XposedHelpers.findClassIfExists("com.android.server.am.ActivityManagerService", classLoader), "setSystemProcess", new XC_MethodHook() {
                 @Override
